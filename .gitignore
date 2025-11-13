@@ -1,6 +1,7 @@
 # Arquivos do SqlKata original - não necessários para o MVP
 *.md
 !README.md
+!docs/**/*.md
 
 # Build artifacts
 **/bin/
