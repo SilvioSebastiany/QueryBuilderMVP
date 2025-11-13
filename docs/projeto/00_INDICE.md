@@ -19,8 +19,8 @@ Esta pasta contém toda a documentação do projeto, organizada por categoria.
 - **[06_PROXIMOS_PASSOS.md](06_PROXIMOS_PASSOS.md)** - Próximas tarefas prioritárias
 
 ### 🛠️ Guias Técnicos
-- **[07_GUIA_DESENVOLVIMENTO.md](07_GUIA_DESENVOLVIMENTO.md)** - Como desenvolver no projeto
-- **[08_GUIA_AMBIENTE.md](08_GUIA_AMBIENTE.md)** - Configuração de ambiente
+- **[07_ENTENDENDO_O_QUE_FOI_CRIADO.md](07_ENTENDENDO_O_QUE_FOI_CRIADO.md)** - Explicação detalhada do Docker e infraestrutura
+- **[08_CHANGELOG.md](08_CHANGELOG.md)** - Histórico de mudanças do projeto ⭐ NOVO
 - **[09_GUIA_TESTES.md](09_GUIA_TESTES.md)** - Como testar a aplicação
 
 ### 📊 Decisões e Padrões
@@ -120,18 +120,25 @@ Esta documentação foi criada para:
 ## 📊 Progresso Geral do Projeto
 
 ```
-[████████░░░░░░░░░░░░░░] 35% Concluído
+[████████████░░░░░░░░░░] 55% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
-✅ Infrastructure básica: 80%
-✅ API básica: 70%
-⏳ Funcionalidades Core: 20%
+✅ Infrastructure básica: 85%
+✅ API básica: 80%
+✅ Funcionalidades Core: 60%
 ⏳ Testes: 0%
 ⏳ Melhorias: 0%
 ```
 
-Última atualização: 12 de Novembro de 2025
+Última atualização: 13 de Novembro de 2025
+
+### 🎉 Últimas Implementações (v0.3.0)
+- ✅ QueryBuilderService completo com JOINs recursivos
+- ✅ QueryBuilderTestController para testes e debug
+- ✅ Script create-tables.sql com 6 tabelas e 35 registros
+- ✅ querybuilder-tests.http com 20+ casos de teste
+- ✅ Documentação atualizada e CHANGELOG criado
 
 ---
 

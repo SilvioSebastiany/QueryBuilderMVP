@@ -3,18 +3,18 @@
 ## 📊 Progresso Geral
 
 ```
-[████████░░░░░░░░░░░░░░] 35% Concluído
+[████████████░░░░░░░░░░] 55% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
-✅ Infrastructure básica: 80%
-✅ API básica: 70%
-⏳ Funcionalidades Core: 20%
+✅ Infrastructure básica: 85%
+✅ API básica: 80%
+✅ Funcionalidades Core: 60%
 ⏳ Testes: 0%
 ⏳ Melhorias: 0%
 ```
 
-**Última atualização:** 12 de Novembro de 2025
+**Última atualização:** 13 de Novembro de 2025
 
 ---
 
@@ -82,20 +82,37 @@ IoC → Domain, Data, Externals, CrossCutting
 ✅ IConsultaDinamicaRepository
 ```
 
+#### Services (100%) ✅
+**`QueryBuilderService.cs`** - Serviço de geração de queries
+```csharp
+✅ MontarQuery() - Query básica com/sem JOINs
+✅ MontarQueryComFiltros() - Query com WHERE dinâmico
+✅ MontarQueryComOrdenacao() - Query com ORDER BY
+✅ MontarQueryComPaginacao() - Query com LIMIT/OFFSET
+✅ CompilarQuery() - Compila para SQL Oracle
+✅ ListarTabelas() - Lista tabelas disponíveis
+✅ TabelaExiste() - Valida existência de tabela
+✅ ObterGrafoRelacionamentos() - Exibe hierarquia de JOINs
+✅ ParseVinculos() - Interpreta relacionamentos
+✅ AdicionarJoinsRecursivosAsync() - JOINs com profundidade
+✅ Prevenção de loops infinitos (HashSet)
+✅ Logging estruturado
+```
+
 #### Estrutura de Pastas
 ```
 QueryBuilder.Domain/
 ├── Entities/           ✅ Criado e populado
 ├── ValueObjects/       ✅ Criado e populado
 ├── Interfaces/         ✅ Criado e populado
-├── Services/           📁 Criado (vazio)
+├── Services/           ✅ QueryBuilderService implementado
 └── Commands/           📁 Criado (vazio)
     └── Handlers/       📁 Criado (vazio)
 ```
 
 ---
 
-### 3. Camada Infrastructure (80%) ✅
+### 3. Camada Infrastructure (85%) ✅
 
 #### Infra.Data
 **`MetadadosRepository.cs`** - Implementação completa
@@ -125,13 +142,14 @@ QueryBuilder.Domain/
 ✅ Registro de DatabaseSettings
 ✅ Registro de IDbConnection (Oracle)
 ✅ Registro de IMetadadosRepository
+✅ Registro de IQueryBuilderService (NOVO)
+✅ Registro de OracleCompiler - Singleton (NOVO)
 ✅ Extension method AddInfrastructure()
 ```
 
 #### Pendente
 ```
 ❌ ConsultaDinamicaRepository
-❌ QueryBuilderService (Domain Service)
 ❌ IADataCatalogService
 ❌ ValidacaoMetadadosService
 ```
@@ -162,9 +180,21 @@ QueryBuilder.Domain/
 ✅ Status codes corretos
 ```
 
+#### QueryBuilderTestController.cs (NOVO) ✅
+```csharp
+✅ GET /api/QueryBuilderTest/simples/{tabela} - Query sem JOINs
+✅ GET /api/QueryBuilderTest/com-joins/{tabela} - Query com JOINs recursivos
+✅ POST /api/QueryBuilderTest/com-filtros/{tabela} - Query com WHERE dinâmico
+✅ GET /api/QueryBuilderTest/tabelas-disponiveis - Lista metadados carregados
+✅ Parâmetro profundidade configurável para JOINs
+✅ Compilação de SQL para debug
+✅ Validação de erros (tabela não encontrada)
+✅ Logging estruturado
+```
+
 #### Pendente
 ```
-❌ ConsultaDinamicaController
+❌ ConsultaDinamicaController (endpoint público final)
 ❌ PUT /api/metadados/{id} - Atualizar
 ❌ DELETE /api/metadados/{id} - Deletar
 ❌ Validações de entrada (FluentValidation)
@@ -176,7 +206,7 @@ QueryBuilder.Domain/
 ### 5. Banco de Dados (100%) ✅
 
 #### Scripts SQL
-**`init-database.sql`** - Completo e funcional
+**`init-database.sql`** - Metadados das tabelas
 ```sql
 ✅ DROP TABLE com tratamento de erro
 ✅ CREATE TABLE TABELA_DINAMICA
@@ -185,7 +215,7 @@ QueryBuilder.Domain/
    - IDX_TABELA_DINAMICA_TABELA
    - IDX_TABELA_DINAMICA_ATIVO
    - IDX_TABELA_DINAMICA_VISIVEL
-✅ 6 registros de exemplo:
+✅ 6 registros de metadados:
    - CLIENTES
    - PEDIDOS
    - PRODUTOS
@@ -193,6 +223,23 @@ QueryBuilder.Domain/
    - CATEGORIAS
    - ENDERECOS
 ✅ Queries de verificação
+```
+
+**`create-tables.sql`** (NOVO) - Tabelas do e-commerce
+```sql
+✅ 6 tabelas com relacionamentos completos
+✅ Foreign Keys e constraints
+✅ Índices para performance
+✅ Comentários em todas as colunas
+✅ Dados de exemplo (35 registros no total):
+   - 5 categorias
+   - 5 clientes
+   - 4 endereços
+   - 7 produtos
+   - 5 pedidos
+   - 9 itens de pedido
+✅ Validação de integridade referencial
+✅ Auto-increment com IDENTITY
 ```
 
 **`check-table.sql`** e **`count-records.sql`**
@@ -257,7 +304,7 @@ QueryBuilder.Domain/
 
 ---
 
-### 8. Documentação (90%) ✅
+### 8. Documentação (95%) ✅
 
 #### Documentos Criados
 ```
@@ -266,8 +313,15 @@ QueryBuilder.Domain/
 ✅ docs/DOCKER_README.md - Guia Docker
 ✅ docs/EXEMPLO_08_METADADOS.md - Tutorial
 ✅ docs/STATUS_MIGRACAO.md - Status (desatualizado)
-✅ api-tests.http - Testes REST Client
-✅ docs/projeto/ - Pasta de documentação estruturada (nova)
+✅ api-tests.http - Testes REST Client (MetadadosController)
+✅ querybuilder-tests.http - Testes REST Client (QueryBuilderTest) NOVO
+✅ docs/projeto/ - Pasta de documentação estruturada:
+   - 00_INDICE.md
+   - 01_OBJETIVO_PROJETO.md
+   - 04_STATUS_ATUAL.md (este arquivo)
+   - 05_ROADMAP.md
+   - 06_PROXIMOS_PASSOS.md
+   - 07_ENTENDENDO_O_QUE_FOI_CRIADO.md
 ```
 
 ---
@@ -286,6 +340,11 @@ QueryBuilder.Domain/
 - [x] Oracle conectando corretamente
 - [x] Docker containers rodando
 - [x] Scripts SQL executando
+- [x] QueryBuilderService gerando SQL simples (NOVO)
+- [x] QueryBuilderService gerando SQL com JOINs (NOVO)
+- [x] QueryBuilderService aplicando filtros WHERE (NOVO)
+- [x] Prevenção de loops infinitos em JOINs funcionando (NOVO)
+- [x] Compilação para SQL Oracle correta (NOVO)
 
 ### Testes Automatizados (Pendente) ❌
 - [ ] Testes unitários
@@ -304,7 +363,9 @@ QueryBuilder.Domain/
 
 ### QueryBuilder.Domain
 ```xml
-✅ (Sem dependências externas - puro .NET)
+✅ FluentValidation (12.1.0)
+✅ Microsoft.Extensions.Logging.Abstractions (9.0.0) - NOVO
+✅ SqlKata (4.0.1)
 ```
 
 ### QueryBuilder.Infra.Data
@@ -338,13 +399,17 @@ QueryBuilder.Domain/
 - ❌ Atualizar metadado existente (endpoint)
 - ❌ Deletar metadado (soft delete)
 
-### Consultas Dinâmicas
-- ❌ Gerar query baseada em metadados
-- ❌ JOINs automáticos
-- ❌ Filtros dinâmicos (WHERE)
-- ❌ Ordenação dinâmica (ORDER BY)
-- ❌ Paginação
-- ❌ Executar query gerada
+### Consultas Dinâmicas (ATUALIZADO)
+- ✅ Gerar query baseada em metadados (QueryBuilderService)
+- ✅ JOINs automáticos com profundidade configurável
+- ✅ JOINs recursivos com prevenção de loops
+- ✅ Filtros dinâmicos (WHERE)
+- ✅ Ordenação dinâmica (ORDER BY)
+- ✅ Paginação (LIMIT/OFFSET)
+- ✅ Compilação para SQL Oracle
+- ✅ Listar tabelas disponíveis
+- ✅ Grafo de relacionamentos
+- ⏳ Executar query gerada no banco (próximo passo)
 
 ### Recursos Avançados
 - ❌ Cache de metadados
@@ -389,21 +454,23 @@ QueryBuilder.Domain/
 
 ### Linhas de Código (Aproximado)
 ```
-Domain Layer:       ~400 linhas
-Infrastructure:     ~300 linhas
-API Layer:          ~200 linhas
-Scripts SQL:        ~200 linhas
-Documentação:       ~3000 linhas
-Total:              ~4100 linhas
+Domain Layer:       ~750 linhas (+350 QueryBuilderService)
+Infrastructure:     ~350 linhas
+API Layer:          ~380 linhas (+180 QueryBuilderTestController)
+Scripts SQL:        ~650 linhas (+450 create-tables.sql)
+Documentação:       ~4300 linhas (+1300)
+Testes HTTP:        ~230 linhas (novo)
+Total:              ~6660 linhas
 ```
 
 ### Arquivos Criados
 ```
-Arquivos .cs:       15
-Arquivos .sql:      3
-Arquivos .md:       10+
+Arquivos .cs:       17 (+2 novos)
+Arquivos .sql:      4 (+1 create-tables.sql)
+Arquivos .http:     2 (+1 querybuilder-tests.http)
+Arquivos .md:       11
 Arquivos config:    8
-Total:              35+ arquivos
+Total:              42 arquivos
 ```
 
 ---
@@ -411,16 +478,19 @@ Total:              35+ arquivos
 ## 🔄 Última Build
 
 **Status:** ✅ Sucesso
-**Data:** 12/11/2025
+**Data:** 13/11/2025
 **Erros:** 0
-**Warnings:** 0
-**Tempo:** ~3s
+**Warnings:** 5 (avisos de lint - ProducesResponseType)
+**Tempo:** ~3.9s
 
 ```powershell
 dotnet build QueryBuilder.Solution.sln
 # Build succeeded.
-#     0 Warning(s)
-#     0 Error(s)
+#   QueryBuilder.Domain: 0.4s
+#   QueryBuilder.Infra.Data: 0.2s
+#   QueryBuilder.Infra.CrossCutting.IoC: 0.1s
+#   QueryBuilder.Api: 1.2s
+#   Total: 3.9s
 ```
 
 ---

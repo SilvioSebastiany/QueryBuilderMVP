@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Oracle.ManagedDataAccess.Client;
 using QueryBuilder.Domain.Interfaces;
+using QueryBuilder.Domain.Services;
 using QueryBuilder.Infra.CrossCutting.Settings;
 using QueryBuilder.Infra.Data.Repositories;
+using SqlKata.Compilers;
 
 namespace QueryBuilder.Infra.CrossCutting.IoC
 {
@@ -33,6 +35,12 @@ namespace QueryBuilder.Infra.CrossCutting.IoC
 
             // Repositories
             services.AddScoped<IMetadadosRepository, MetadadosRepository>();
+
+            // Domain Services
+            services.AddScoped<IQueryBuilderService, QueryBuilderService>();
+
+            // SqlKata Compiler (Singleton pois é stateless)
+            services.AddSingleton<OracleCompiler>();
 
             return services;
         }

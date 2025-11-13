@@ -14,7 +14,6 @@ services:
       - APP_USER_PASSWORD=querybuilder123
     volumes:
       - oracle-data:/opt/oracle/oradata   # Persistência dos dados
-      - ./Exemplos/script_tabela_dinamica.sql:/docker-entrypoint-initdb.d/01_init.sql:ro  # Script de inicialização
     healthcheck:
       test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -s system/oracle@//localhost:1521/XE || exit 1"]
       interval: 30s

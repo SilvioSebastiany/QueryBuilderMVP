@@ -1,20 +1,4 @@
--- ============================================
--- Script SQL para MVP QueryBuilder
--- Tabela de Metadados (Versão Atualizada)
--- ============================================
 
--- ============================================
--- 1. DROPAR TABELA SE EXISTIR
--- ============================================
-BEGIN
-   EXECUTE IMMEDIATE 'DROP TABLE TABELA_DINAMICA';
-EXCEPTION
-   WHEN OTHERS THEN
-      IF SQLCODE != -942 THEN
-         RAISE;
-      END IF;
-END;
-/
 
 -- ============================================
 -- 2. CRIAR TABELA DE METADADOS
@@ -146,31 +130,8 @@ COMMIT;
 -- 5. CONSULTAS DE VERIFICAÇÃO
 -- ============================================
 
--- Listar todos os metadados
-SELECT ID, TABELA, CHAVE_PK, VISIVEL_PARA_IA, ATIVO
-FROM TABELA_DINAMICA
-ORDER BY TABELA;
 
 -- Ver detalhes completos
-SELECT *
-FROM TABELA_DINAMICA
-WHERE TABELA = 'CLIENTES';
+SELECT * FROM TABELA_DINAMICA;
 
--- Contar registros
-SELECT COUNT(*) AS TOTAL_METADADOS
-FROM TABELA_DINAMICA;
 
-PROMPT
-PROMPT ==========================================
-PROMPT Script executado com sucesso!
-PROMPT Total de metadados criados: 6
-PROMPT - CLIENTES
-PROMPT - PEDIDOS
-PROMPT - PRODUTOS
-PROMPT - ITENS_PEDIDO
-PROMPT - CATEGORIAS
-PROMPT - ENDERECOS
-PROMPT ==========================================
-PROMPT
-
-EXIT;
