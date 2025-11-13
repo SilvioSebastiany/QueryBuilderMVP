@@ -1,0 +1,62 @@
+{
+    // Configurações do C#
+    "dotnet.defaultSolution": "QueryBuilder.Solution.sln",
+    // Excluir pastas do explorer
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/.vs": true,
+        "**/oracle-data": true
+    },
+    // Excluir pastas da pesquisa
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/node_modules": true,
+        "**/.vs": true,
+        "**/oracle-data": true
+    },
+    // Auto-save
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    // Formatação
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    // C# específico
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    // JSON
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.tabSize": 2
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.tabSize": 2
+    },
+    // Docker
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+    },
+    // Terminal
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // Omnisharp
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    // Debug
+    "debug.internalConsoleOptions": "neverOpen",
+    "debug.openDebug": "openOnDebugBreak",
+    // Git
+    "git.ignoreLimitWarning": true,
+    // Recomendações de extensões
+    "extensions.ignoreRecommendations": false,
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+    "dotnet.formatting.organizeImportsOnFormat": true
+}

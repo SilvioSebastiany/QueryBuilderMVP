@@ -1,0 +1,111 @@
+{
+    // Use IntelliSense to find out which attributes exist for C# debugging
+    // Use hover for the description of the existing attributes
+    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Exemplos - Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Exemplos/bin/Debug/net8.0/Exemplos.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Exemplos",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Exemplos - Release",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-release-exemplos",
+            "program": "${workspaceFolder}/Exemplos/bin/Release/net8.0/Exemplos.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Exemplos",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "QueryBuilder.Tests - Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}/QueryBuilder.Tests/QueryBuilder.Tests.csproj"
+            ],
+            "cwd": "${workspaceFolder}/QueryBuilder.Tests",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "QueryBuilder.Api - Debug (HTTP)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "prepare-api-debug",
+            "program": "${workspaceFolder}/src/QueryBuilder.Api/bin/Debug/net9.0/QueryBuilder.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/QueryBuilder.Api",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5249"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            }
+        },
+        {
+            "name": "QueryBuilder.Api - Debug (HTTPS)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "prepare-api-debug",
+            "program": "${workspaceFolder}/src/QueryBuilder.Api/bin/Debug/net9.0/QueryBuilder.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/QueryBuilder.Api",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7249;http://localhost:5249"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            }
+        },
+        {
+            "name": "QueryBuilder.Api - Attach to Container",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "querybuilder-api"
+                ],
+                "debuggerPath": "/vsdbg/vsdbg",
+                "pipeCwd": "${workspaceRoot}",
+                "quoteArgs": false
+            },
+            "sourceFileMap": {
+                "/src": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

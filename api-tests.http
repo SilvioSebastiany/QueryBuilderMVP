@@ -1,0 +1,126 @@
+### QueryBuilder API - Testes HTTP
+### Arquivo para usar com a extensão REST Client do VS Code
+
+@baseUrl = http://localhost:5249
+@contentType = application/json
+
+###############################################################################
+# TESTES BÁSICOS
+###############################################################################
+
+### 1. Teste de Conexão - Rota de Teste
+GET {{baseUrl}}/api/metadados/teste HTTP/1.1
+
+###############################################################################
+# METADADOS - CONSULTAS
+###############################################################################
+
+### 2. Listar Todos os Metadados (apenas ativos)
+GET {{baseUrl}}/api/metadados HTTP/1.1
+
+### 3. Listar Todos os Metadados (incluindo inativos)
+GET {{baseUrl}}/api/metadados?apenasAtivos=false HTTP/1.1
+
+### 4. Obter Metadado por ID
+GET {{baseUrl}}/api/metadados/1 HTTP/1.1
+
+### 5. Obter Metadado por Nome da Tabela
+GET {{baseUrl}}/api/metadados/tabela/CLIENTES HTTP/1.1
+
+###############################################################################
+# METADADOS - CRIAÇÃO
+###############################################################################
+
+### 6. Criar Novo Metadado - Tabela CLIENTES
+POST {{baseUrl}}/api/metadados HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "tabela": "CLIENTES",
+  "camposDisponiveis": "ID,NOME,EMAIL,TELEFONE,DATA_CADASTRO,ATIVO",
+  "chavePk": "ID",
+  "vinculoEntreTabela": "PEDIDOS:ID_CLIENTE:ID;ENDERECOS:ID_CLIENTE:ID",
+  "descricaoTabela": "Cadastro de clientes do sistema",
+  "descricaoCampos": "ID:Identificador único do cliente|NOME:Nome completo|EMAIL:E-mail de contato|TELEFONE:Telefone para contato|DATA_CADASTRO:Data de cadastro no sistema|ATIVO:Indica se o cliente está ativo",
+  "visivelParaIA": true
+}
+
+### 7. Criar Novo Metadado - Tabela PEDIDOS
+POST {{baseUrl}}/api/metadados HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "tabela": "PEDIDOS",
+  "camposDisponiveis": "ID,ID_CLIENTE,DATA_PEDIDO,VALOR_TOTAL,STATUS",
+  "chavePk": "ID",
+  "vinculoEntreTabela": "CLIENTES:ID:ID_CLIENTE;ITENS_PEDIDO:ID_PEDIDO:ID",
+  "descricaoTabela": "Pedidos realizados pelos clientes",
+  "descricaoCampos": "ID:Identificador único do pedido|ID_CLIENTE:Referência ao cliente|DATA_PEDIDO:Data de realização do pedido|VALOR_TOTAL:Valor total do pedido|STATUS:Status atual do pedido",
+  "visivelParaIA": true
+}
+
+### 8. Criar Novo Metadado - Tabela PRODUTOS
+POST {{baseUrl}}/api/metadados HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "tabela": "PRODUTOS",
+  "camposDisponiveis": "ID,NOME,DESCRICAO,PRECO,ESTOQUE,CATEGORIA",
+  "chavePk": "ID",
+  "vinculoEntreTabela": "ITENS_PEDIDO:ID_PRODUTO:ID",
+  "descricaoTabela": "Catálogo de produtos disponíveis",
+  "descricaoCampos": "ID:Código do produto|NOME:Nome do produto|DESCRICAO:Descrição detalhada|PRECO:Preço unitário|ESTOQUE:Quantidade em estoque|CATEGORIA:Categoria do produto",
+  "visivelParaIA": true
+}
+
+### 9. Criar Novo Metadado - Mínimo Necessário
+POST {{baseUrl}}/api/metadados HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "tabela": "TESTE_SIMPLES",
+  "camposDisponiveis": "ID,NOME",
+  "chavePk": "ID"
+}
+
+###############################################################################
+# TESTES DE ERRO
+###############################################################################
+
+### 10. Tentar criar metadado duplicado (espera erro 400)
+POST {{baseUrl}}/api/metadados HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "tabela": "CLIENTES",
+  "camposDisponiveis": "ID,NOME",
+  "chavePk": "ID"
+}
+
+### 11. Buscar metadado inexistente (espera erro 404)
+GET {{baseUrl}}/api/metadados/99999 HTTP/1.1
+
+### 12. Buscar por tabela inexistente (espera erro 404)
+GET {{baseUrl}}/api/metadados/tabela/TABELA_INEXISTENTE HTTP/1.1
+
+###############################################################################
+# SWAGGER / HEALTH
+###############################################################################
+
+### 13. Acessar Swagger UI (responde com HTML)
+GET {{baseUrl}}/swagger/index.html HTTP/1.1
+
+### 14. OpenAPI JSON
+GET {{baseUrl}}/swagger/v1/swagger.json HTTP/1.1
+
+###############################################################################
+# VARIÁVEIS PARA DOCKER
+###############################################################################
+# Descomente abaixo para testar com Docker
+# @baseUrl = http://localhost:5249
+
+###############################################################################
+# VARIÁVEIS PARA HTTPS
+###############################################################################
+# Descomente abaixo para testar com HTTPS
+# @baseUrl = https://localhost:7249

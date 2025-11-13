@@ -1,0 +1,16 @@
+# Arquivos do SqlKata original - não necessários para o MVP
+*.md
+!README.md
+
+# Build artifacts
+**/bin/
+**/obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+.vs/
+
+# Docker volumes
+oracle-data/
