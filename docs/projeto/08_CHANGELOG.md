@@ -4,6 +4,63 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.5.3] - 2025-11-20 (ORGANIZAÇÃO - Separação de Interfaces)
+
+### 🎯 Objetivo
+Separar interfaces em arquivos individuais seguindo o padrão corporativo Herval - uma interface por arquivo.
+
+### ✅ IMPLEMENTADO
+
+#### 📁 Interfaces Separadas
+- **Estrutura anterior (monolítica):**
+  ```
+  Interfaces/
+  └── IRepositories.cs (todas as 5 interfaces juntas)
+  ```
+
+- **Nova estrutura (organizada):**
+  ```
+  Interfaces/
+  ├── Repositories/
+  │   ├── IMetadadosRepository.cs
+  │   └── IConsultaDinamicaRepository.cs
+  ├── IQueryBuilderService.cs
+  ├── IIADataCatalogService.cs
+  └── IValidacaoMetadadosService.cs
+  ```
+
+#### 📦 Arquivos Criados (5)
+1. **IMetadadosRepository.cs** - Repositório de metadados (9 métodos)
+2. **IConsultaDinamicaRepository.cs** - Repositório de consultas dinâmicas (4 métodos)
+3. **IQueryBuilderService.cs** - Serviço de montagem de queries (9 métodos)
+4. **IIADataCatalogService.cs** - Serviço de catálogo para IA (4 métodos)
+5. **IValidacaoMetadadosService.cs** - Serviço de validação (4 métodos)
+
+#### 🗑️ Arquivos Removidos
+- **IRepositories.cs** - Arquivo monolítico com todas as interfaces (72 linhas)
+
+### 📊 Impacto
+- **Arquivos:** 1 arquivo monolítico → 5 arquivos específicos
+- **Organização:** Repositórios agora em pasta `Repositories/`
+- **Manutenibilidade:** Cada interface isolada e focada
+- **Navegação:** Mais fácil encontrar interface específica
+
+### 🎯 Benefícios
+- ✅ Alinhamento com padrão corporativo Herval
+- ✅ Melhor organização de código (SRP - Single Responsibility)
+- ✅ Facilita navegação no projeto
+- ✅ Evita conflitos de merge (mudanças isoladas)
+- ✅ IntelliSense mais preciso
+- ✅ Imports mais limpos (usa apenas o necessário)
+
+### 🔍 Validação
+- ✅ Arquivos criados com sucesso
+- ✅ Estrutura de pastas organizada
+- ✅ Namespaces corretos mantidos
+- ✅ Nenhuma quebra de referências
+
+---
+
 ## [0.5.2] - 2025-11-20 (REFATORAÇÃO - Simplificação Controllers Padrão Herval)
 
 ### 🎯 Objetivo
