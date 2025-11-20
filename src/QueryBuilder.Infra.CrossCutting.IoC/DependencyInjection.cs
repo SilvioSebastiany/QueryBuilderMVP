@@ -42,8 +42,12 @@ namespace QueryBuilder.Infra.CrossCutting.IoC
             services.AddScoped<IMetadadosRepository, MetadadosRepository>();
             services.AddScoped<IConsultaDinamicaRepository, ConsultaDinamicaRepository>();
 
-            // Domain Services
+            // Services (auxiliares)
             services.AddScoped<IQueryBuilderService, QueryBuilderService>();
+
+            // DomainServices (lógica de negócio)
+            services.AddScoped<QueryBuilder.Domain.DomainServices.ConsultaDinamicaDomainService>();
+            services.AddScoped<QueryBuilder.Domain.DomainServices.MetadadosDomainService>();
 
             // SqlKata Compiler (Singleton pois é stateless)
             services.AddSingleton<OracleCompiler>();

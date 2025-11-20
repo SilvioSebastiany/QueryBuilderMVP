@@ -134,13 +134,14 @@ src/
 
 ## 📊 Progresso Geral
 ```
-[████████████████░░░░░░] 80% Concluído
+[██████████████████░░░░] 85% Concluído
 
 ✅ Estrutura base: 100%
 ✅ Domain Entities: 100%
 ✅ Domain Interfaces: 100%
 ✅ Domain ValueObjects: 100%
 ✅ Domain Services: 100%
+✅ Domain DomainServices: 100% ⭐ NOVO
 ✅ Domain CQRS (Queries): 100%
 ✅ Domain CQRS (Commands): 0% (próxima fase)
 ✅ Domain Behaviors: 100%
@@ -150,6 +151,7 @@ src/
 ✅ API Controllers: 50% (1 de 2 refatorado)
 ✅ IoC: 100%
 ✅ CrossCutting: 100%
+✅ Documentação: 100% ⭐ NOVO
 ```
 
 ---
@@ -253,26 +255,54 @@ Repository (acesso a dados)
 
 ---
 
-## 📝 Últimas Alterações (Nov 18, 2025):
+## 📝 Últimas Alterações (Nov 19, 2025):
 
-### Implementado:
-✅ **Migração CQRS + MediatR completa**
-- 8 novos arquivos criados no Domain
-- ConsultaDinamicaController refatorado
+### ✅ Implementado - CQRS + MediatR + DomainServices:
+
+**Fase 1.5 (Nov 18):**
+- 8 novos arquivos criados no Domain (Queries, Handlers, Validators, Behaviors, Notifications)
+- ConsultaDinamicaController refatorado (315 → 108 linhas)
 - Pipeline MediatR funcionando (Logging → Validation → Handler)
-- Build com sucesso (0 erros, 4 warnings de compatibilidade MediatR)
+
+**Fase 1.6 (Nov 19) - DomainServices:**
+- ✅ `ConsultaDinamicaDomainService.cs` - Lógica de negócio de consultas
+- ✅ `MetadadosDomainService.cs` - Lógica de negócio de metadados
+- ✅ Handlers refatorados para usar DomainServices (10-20 linhas, apenas orquestração)
+- ✅ DomainServices registrados no DI (Scoped)
+- ✅ Documentação completa criada: `DECISOES_ARQUITETURAIS.md`
+
+### 📁 Estrutura Final Implementada:
+```
+Domain/
+├── Queries/Handlers/          ✅ Orquestradores magros (10-20 linhas)
+├── DomainServices/            ✅ Lógica de negócio (50-200 linhas)
+│   ├── ConsultaDinamicaDomainService.cs
+│   └── MetadadosDomainService.cs
+├── Behaviors/                 ✅ Cross-cutting concerns
+├── Validators/                ✅ FluentValidation
+└── Services/                  ✅ Auxiliares técnicos
+```
+
+### 🎯 Decisão Arquitetural:
+**CQRS Completo + DomainServices** (vs. Padrão Herval)
+- Justificativa: Sustentabilidade, testabilidade, consistência
+- Documentado em: `docs/DECISOES_ARQUITETURAIS.md`
+- Diferença do Herval: Queries também via MediatR (não apenas Commands)
 
 ### Status do Build:
 ```bash
 ✅ Compilação: SUCCESS
-⏱️  Tempo: 3.8s
-⚠️  Avisos: 4 (NU1608 - compatibilidade MediatR 13 vs 11, não bloqueante)
+⏱️  Tempo: 7.9s
+❌ Erros: 0
+⚠️  Avisos: 7 (3 nullability warnings + 4 MediatR version compatibility)
 ```
 
-### Arquivos Modificados:
-- `src/QueryBuilder.Domain/QueryBuilder.Domain.csproj` (packages)
-- `src/QueryBuilder.Infra.CrossCutting.IoC/DependencyInjection.cs` (MediatR config)
-- `src/QueryBuilder.Api/Controllers/ConsultaDinamicaController.cs` (CQRS)
+### Arquivos Criados/Modificados:
+- `src/QueryBuilder.Domain/DomainServices/ConsultaDinamicaDomainService.cs` ✅
+- `src/QueryBuilder.Domain/DomainServices/MetadadosDomainService.cs` ✅
+- `src/QueryBuilder.Domain/Queries/Handlers/ConsultaDinamicaQueryHandler.cs` ✅ (refatorado)
+- `src/QueryBuilder.Infra.CrossCutting.IoC/DependencyInjection.cs` ✅ (DomainServices registrados)
+- `docs/DECISOES_ARQUITETURAIS.md` ✅ (novo, 400+ linhas de documentação)
 
 ### Backup Criado:
 - `ConsultaDinamicaController.OLD.cs` (versão anterior com 315 linhas)
