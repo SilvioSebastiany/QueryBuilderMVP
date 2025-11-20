@@ -13,5 +13,12 @@
 *.suo
 .vs/
 
+# VS Code - User specific settings
+.vscode/settings.json
+.vscode/extensions.json
+
+# Documentation - personal notes
+docs/padrão behaviors.txt
+
 # Docker volumes
 oracle-data/
