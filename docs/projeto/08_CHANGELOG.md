@@ -4,7 +4,199 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
-## [0.5.0] - 2025-12-09 (PLANEJADO - Migração CQRS + Padrão Herval)
+## [0.5.0] - 2025-11-20 (EM PROGRESSO - Migração CQRS + MediatR)
+
+### 🎯 Objetivo
+Migrar arquitetura para padrão corporativo com CQRS + MediatR + FluentValidation.
+
+### ✅ IMPLEMENTADO (60% da migração)
+
+#### ✨ MediatR + CQRS
+- **Queries implementadas (4)**
+  - `ObterTodosMetadadosQuery` + Handler + Result
+  - `ObterMetadadoPorIdQuery` + Handler
+  - `ObterMetadadoPorTabelaQuery` + Handler
+  - `ConsultaDinamicaQuery` + Handler (consultas dinâmicas)
+
+- **Estrutura CQRS criada**
+  - `Domain/Queries/` - Queries (requests)
+  - `Domain/Queries/Handlers/` - Handlers (lógica)
+  - `Domain/Queries/Metadados/` - Queries específicas de metadados
+  - `Domain/Commands/Handlers/` - Estrutura criada (aguardando implementação)
+
+#### ✨ FluentValidation Pipeline
+- **Validators implementados (3)**
+  - `ObterMetadadoPorIdQueryValidator` - Valida ID > 0
+  - `ObterMetadadoPorTabelaQueryValidator` - Valida nome da tabela (formato, tamanho, regex)
+  - `ConsultaDinamicaQueryValidator` - Valida consultas dinâmicas
+
+- **ValidationBehavior**
+  - Pipeline automático de validação antes dos Handlers
+  - Integrado com NotificationContext
+  - Retorna null/default se validação falhar
+  - Ordem no pipeline: Logging → Validation → Handler
+
+#### ✨ Notification Pattern
+- **INotificationContext + NotificationContext**
+  - Substituição de exceptions por notificações
+  - `AddNotification(key, message)`
+  - `HasNotifications` property
+  - Notifications collection (`IReadOnlyCollection<Notification>`)
+  - Scoped lifetime (por request HTTP)
+
+#### ✨ Pipeline Behaviors
+- **LoggingBehavior**
+  - Log automático de início/fim de cada request
+  - Medição de tempo de execução com Stopwatch
+  - Log estruturado com `ILogger<T>`
+  - Log de exceções com stack trace
+  - Formato: `"Iniciando {RequestName} - {@Request}"`
+
+- **ValidationBehavior**
+  - Validações automáticas via FluentValidation
+  - Executa TODOS os validators encontrados
+  - Adiciona erros no NotificationContext
+  - Interrompe pipeline se validação falhar
+
+#### ✨ DomainServices (Nova camada)
+- **MetadadosDomainService**
+  - Lógica de negócio centralizada
+  - `ObterTodosAsync()` com regras de negócio
+  - `ObterPorIdAsync()` com validações (ID > 0)
+  - `ObterPorTabelaAsync()` com normalização
+  - Logging estruturado de todas as operações
+  - Separação: Handler (orquestração) vs DomainService (lógica)
+
+- **ConsultaDinamicaDomainService**
+  - Lógica de consultas dinâmicas
+  - Integração com QueryBuilderService
+  - Validações de whitelist de tabelas
+  - Montagem de queries com JOINs recursivos
+
+#### 🔧 Controllers Refatorados (CQRS Pattern)
+- **ConsultaDinamicaController**
+  - Migrado 100% para `IMediator.Send()`
+  - Removido try/catch manual (confia no pipeline)
+  - Verifica `NotificationContext` para erros de validação
+  - Respostas HTTP padronizadas (200 OK, 400 BadRequest, 500 InternalServerError)
+  - Código limpo e enxuto (de ~150 linhas para ~80)
+
+#### 🔧 Dependency Injection Modernizado
+- **DependencyInjection.cs atualizado**
+  - `AddMediatR()` com Assembly Scanning do Domain
+  - Behaviors registrados na ordem correta:
+    1. LoggingBehavior (primeiro - envolve tudo)
+    2. ValidationBehavior (segundo - antes do handler)
+    3. Handler (último - lógica de negócio)
+  - `AddValidatorsFromAssembly()` - FluentValidation automático
+  - NotificationContext como Scoped (isolado por request)
+  - DomainServices registrados como Scoped
+
+#### 📦 Packages NuGet Adicionados
+- **QueryBuilder.Domain.csproj**
+  - `MediatR` v13.1.0 - Mediator pattern
+  - `FluentValidation` v12.1.0 - Validações fluentes
+  - `FluentValidation.DependencyInjectionExtensions` v12.1.0 - DI integration
+
+#### 📊 Impacto Atual
+- **Linhas de código:** 7.550 → ~9.200 (+1.650 linhas)
+- **Arquivos criados:** 44 → 55 (+11 arquivos novos)
+  - 3 Queries de Metadados
+  - 1 Query de Consulta Dinâmica
+  - 4 Query Handlers
+  - 3 Validators (FluentValidation)
+  - 2 Behaviors (Logging + Validation)
+  - 2 DomainServices
+- **Progresso da migração CQRS:** ~60% concluído
+- **Queries migradas:** 4/4 (100% ✅)
+- **Commands migrados:** 0/3 (0% - pendente)
+- **Controllers refatorados:** 1/2 (50%)
+
+### 🚧 PENDENTE (40% restante)
+
+#### Commands a implementar (3)
+- [ ] `CriarMetadadoCommand` + Handler + Validator
+  - Validações: campos obrigatórios, formatos, duplicação
+- [ ] `AtualizarMetadadoCommand` + Handler + Validator
+  - Validações: existência, campos alteráveis
+- [ ] `DesativarMetadadoCommand` + Handler + Validator
+  - Soft delete com validação de dependências
+
+#### MetadadosController
+- [ ] Migrar endpoint `POST /api/metadados` para MediatR
+- [ ] Migrar endpoint `PUT /api/metadados/{id}` para MediatR
+- [ ] Migrar endpoint `DELETE /api/metadados/{id}` para MediatR
+- [ ] Remover injeção direta de `IMetadadosRepository`
+- [ ] Usar apenas `IMediator` + `INotificationContext`
+
+#### Unit of Work (Opcional - Futuro)
+- [ ] Criar `IUnitOfWork` interface
+- [ ] Implementar `UnitOfWork` com Oracle + Dapper
+- [ ] Adicionar nos Handlers de Commands (controle transacional)
+- [ ] TransactionBehavior no pipeline
+
+#### DTOs e Responses (Melhorias)
+- [ ] Criar DTOs específicos para cada request
+- [ ] Criar Response models padronizados
+- [ ] Remover `Dictionary<string, object>` dos retornos
+- [ ] Documentação Swagger aprimorada
+
+### 🎯 Benefícios Já Alcançados
+- ✅ Validações automáticas via pipeline (sem código manual)
+- ✅ Logging estruturado e automático em todos os requests
+- ✅ Notification Pattern funcionando (erros sem exceptions)
+- ✅ Separação clara de responsabilidades (CQRS)
+- ✅ Handlers testáveis isoladamente (injeção de dependências)
+- ✅ Código mais limpo e legível nos Controllers
+- ✅ Alinhamento com padrão corporativo moderno
+- ✅ FluentValidation com mensagens claras
+- ✅ DomainServices centralizando lógica de negócio
+
+### 📝 Notas Técnicas
+- **Ordem do Pipeline MediatR:** LoggingBehavior → ValidationBehavior → Handler
+- **Assembly Scanning:** Automático para Handlers e Validators
+- **Notification Context:** Scoped por request HTTP (isolamento)
+- **DomainServices:** Camada intermediária entre Handlers e Repositories
+- **Padrão:** Handler orquestra, DomainService executa lógica
+
+---
+
+## [0.4.2] - 2025-11-20 (ORGANIZAÇÃO - VS Code e Java)
+
+### 🔧 Modificado
+- **Configurações do VS Code**
+  - Movida configuração `sonarlint.ls.javaHome` de workspace para User Settings
+  - Removidos arquivos `settings.json` e `extensions.json` da pasta `.vscode/`
+  - Mantidos apenas `launch.json` e `tasks.json` (essenciais para o time)
+  - Configurações pessoais agora ficam no perfil do usuário
+
+### ✨ Adicionado
+- **Java Runtime Environment**
+  - Instalado Eclipse Temurin JRE 17.0.17 via winget
+  - Configurado SonarLint para usar JRE instalado
+  - SonarLint agora funciona corretamente para análise de código
+
+- **.gitignore**
+  - Adicionada regra `.vscode/settings.json` para ignorar configurações pessoais
+  - Adicionada regra `.vscode/extensions.json` para ignorar extensões pessoais
+  - Adicionada regra `docs/padrão behaviors.txt` para ignorar anotações pessoais
+
+### 📊 Impacto
+- **Arquivos do workspace:** 46 → 44 (-2 arquivos)
+- **Configurações compartilhadas:** Somente debug/tasks (mais limpo)
+- **Qualidade de código:** SonarLint funcionando com análise em tempo real
+- **Colaboração:** Cada desenvolvedor pode ter suas preferências sem conflitos
+
+### 🎯 Benefícios
+- ✅ Configurações pessoais não mais commitadas no Git
+- ✅ SonarLint funcionando para análise de qualidade de código
+- ✅ Workspace mais limpo e focado em configurações de projeto
+- ✅ Evita conflitos de merge em arquivos de preferências pessoais
+- ✅ Facilita onboarding de novos desenvolvedores
+
+---
+
+## [0.6.0] - FUTURO (PLANEJADO - Conclusão CQRS + Melhorias)
 
 ### 🎯 Objetivo
 Migrar arquitetura para padrão corporativo da empresa (Herval) com CQRS + MediatR.

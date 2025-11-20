@@ -3,18 +3,19 @@
 ## 📊 Progresso Geral
 
 ```
-[███████████████░░░░░░░] 75% Concluído
+[████████████████░░░░░] 80% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
 ✅ Infrastructure básica: 100%
-✅ API básica: 90%
+✅ API básica: 95%
 ✅ Funcionalidades Core: 100%
+✅ CQRS + MediatR: 60% (Queries prontas, Commands pendentes)
 ⏳ Testes: 20% (testes manuais realizados, automatizados pendentes)
-⏳ Melhorias: 0%
+⏳ Melhorias: 10%
 ```
 
-**Última atualização:** 15 de Novembro de 2025
+**Última atualização:** 20 de Novembro de 2025
 
 ---
 
@@ -99,6 +100,40 @@ IoC → Domain, Data, Externals, CrossCutting
 ✅ Logging estruturado
 ```
 
+#### 🆕 CQRS + MediatR (60%) ✅
+**Queries implementadas (4)**
+```csharp
+✅ ObterTodosMetadadosQuery + Handler + Result
+✅ ObterMetadadoPorIdQuery + Handler
+✅ ObterMetadadoPorTabelaQuery + Handler
+✅ ConsultaDinamicaQuery + Handler
+```
+
+**Validators implementados (3)**
+```csharp
+✅ ObterMetadadoPorIdQueryValidator (FluentValidation)
+✅ ObterMetadadoPorTabelaQueryValidator (FluentValidation)
+✅ ConsultaDinamicaQueryValidator (FluentValidation)
+```
+
+**Pipeline Behaviors (2)**
+```csharp
+✅ LoggingBehavior - Log automático de requests/responses
+✅ ValidationBehavior - Validações automáticas via FluentValidation
+```
+
+**DomainServices (2)**
+```csharp
+✅ MetadadosDomainService - Lógica de negócio de metadados
+✅ ConsultaDinamicaDomainService - Lógica de consultas dinâmicas
+```
+
+**Notification Pattern**
+```csharp
+✅ INotificationContext + NotificationContext
+✅ Substituição de exceptions por notificações
+```
+
 #### Estrutura de Pastas
 ```
 QueryBuilder.Domain/
@@ -106,8 +141,15 @@ QueryBuilder.Domain/
 ├── ValueObjects/       ✅ Criado e populado
 ├── Interfaces/         ✅ Criado e populado
 ├── Services/           ✅ QueryBuilderService implementado
-└── Commands/           📁 Criado (vazio)
-    └── Handlers/       📁 Criado (vazio)
+├── DomainServices/     ✅ 2 services implementados (NOVO)
+├── Queries/            ✅ 4 queries implementadas (NOVO)
+│   ├── Handlers/       ✅ 4 handlers implementados (NOVO)
+│   └── Metadados/      ✅ 3 queries de metadados (NOVO)
+├── Commands/           📁 Criado (aguardando implementação)
+│   └── Handlers/       📁 Criado (vazio)
+├── Validators/         ✅ 3 validators implementados (NOVO)
+├── Behaviors/          ✅ 2 behaviors implementados (NOVO)
+└── Notifications/      ✅ NotificationContext implementado (NOVO)
 ```
 
 ---
@@ -137,16 +179,26 @@ QueryBuilder.Domain/
 ```
 
 #### Infra.CrossCutting.IoC
-**`DependencyInjection.cs`** - Container de DI
+**`DependencyInjection.cs`** - Container de DI modernizado
 ```csharp
 ✅ Registro de DatabaseSettings
 ✅ Registro de IDbConnection (Oracle)
 ✅ Registro de IMetadadosRepository
-✅ Registro de IConsultaDinamicaRepository (NOVO)
-✅ Registro de IQueryBuilderService (NOVO)
-✅ Registro de OracleCompiler - Singleton (NOVO)
+✅ Registro de IConsultaDinamicaRepository
+✅ Registro de IQueryBuilderService
+✅ Registro de OracleCompiler - Singleton
+✅ Registro de DomainServices (Scoped) (NOVO)
+✅ Registro de NotificationContext (Scoped) (NOVO)
+✅ MediatR com Assembly Scanning (NOVO)
+✅ FluentValidation com Assembly Scanning (NOVO)
+✅ Pipeline Behaviors registrados (NOVO)
 ✅ Extension method AddInfrastructure()
 ```
+
+**Packages NuGet Adicionados:**
+- `MediatR` v13.1.0
+- `FluentValidation` v12.1.0
+- `FluentValidation.DependencyInjectionExtensions` v12.1.0
 
 #### Infra.Data - Repositories (ATUALIZADO)
 **`ConsultaDinamicaRepository.cs`** - Execução de queries dinâmicas (NOVO) ✅
