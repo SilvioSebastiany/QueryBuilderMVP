@@ -3,7 +3,7 @@
 ## 📊 Progresso Geral
 
 ```
-[████████████████░░░░░] 80% Concluído
+[████████████████░░░░░] 82% Concluído
 
 ✅ Fundação e Arquitetura: 100%
 ✅ Domain Layer: 100%
@@ -11,11 +11,12 @@
 ✅ API básica: 95%
 ✅ Funcionalidades Core: 100%
 ✅ CQRS + MediatR: 60% (Queries prontas, Commands pendentes)
+✅ Performance e Type Safety: 100% (DTO tipado implementado)
 ⏳ Testes: 20% (testes manuais realizados, automatizados pendentes)
 ⏳ Melhorias: 10%
 ```
 
-**Última atualização:** 20 de Novembro de 2025
+**Última atualização:** 20 de Novembro de 2025 - Otimização de Performance
 
 ---
 
@@ -157,7 +158,7 @@ QueryBuilder.Domain/
 ### 3. Camada Infrastructure (85%) ✅
 
 #### Infra.Data
-**`MetadadosRepository.cs`** - Implementação completa
+**`MetadadosRepository.cs`** - Implementação completa e otimizada ⚡
 ```csharp
 ✅ ObterTodosAsync() - Lista metadados
 ✅ ObterPorIdAsync() - Busca por ID
@@ -165,9 +166,24 @@ QueryBuilder.Domain/
 ✅ CriarAsync() - Insere novo metadado
 ✅ AtualizarAsync() - Atualiza metadado
 ✅ ExisteAsync() - Verifica existência
-✅ Queries SQL parametrizadas (Oracle)
-✅ Tratamento de erros
+✅ Queries SQL com aliases (mapeamento PascalCase) (NOVO)
+✅ Uso de MetadadoDto ao invés de dynamic (NOVO)
+✅ PropertyInfo cacheados (performance) (NOVO)
+✅ Zero reflection desnecessário (NOVO)
+✅ Compile-time type safety (NOVO)
+✅ Tratamento de erros robusto
 ✅ Async/Await patterns
+```
+
+**`MetadadoDto.cs`** - DTO tipado para mapeamento Dapper (NOVO) ⚡
+```csharp
+✅ 11 propriedades tipadas (int, string, DateTime)
+✅ Mapeamento 1:1 com schema Oracle
+✅ Documentação XML completa
+✅ Record type (immutable)
+✅ Conversão correta de NUMBER(1) Oracle → int C#
+✅ Elimina overhead de dynamic
+✅ IntelliSense funcionando
 ```
 
 #### Infra.CrossCutting
@@ -613,37 +629,47 @@ dotnet build QueryBuilder.Solution.sln
 
 ### 🎯 FASE ARQUITETURAL: Migração para Padrão Herval (Prioridade ALTA)
 
-1. 🔴 **Implementar CQRS + MediatR** (Semana 1-2)
-   - Instalar MediatR e FluentValidation
-   - Criar estrutura Commands/ e Queries/ no Domain
-   - Migrar lógica para Handlers
-   - Refatorar Controllers para usar IMediator
+1. ✅ **Implementar CQRS Queries + MediatR** (CONCLUÍDO)
+   - ✅ Instalar MediatR e FluentValidation
+   - ✅ Criar estrutura Queries/ no Domain
+   - ✅ Migrar lógica de consulta para Handlers
+   - ✅ Refatorar Controllers para usar IMediator
 
-2. 🔴 **Implementar Notification Pattern** (Semana 2)
-   - Criar INotificationContext e NotificationContext
-   - Substituir exceptions por notificações
-   - Pipeline de validação automática
+2. ✅ **Implementar Notification Pattern** (CONCLUÍDO)
+   - ✅ Criar INotificationContext e NotificationContext
+   - ✅ Substituir exceptions por notificações
+   - ✅ Pipeline de validação automática
 
-3. 🔴 **Implementar Unit of Work** (Semana 2)
-   - Criar IUnitOfWork interface
-   - Controle transacional explícito
-   - CommitAsync() pattern
+3. ✅ **Pipeline Behaviors** (CONCLUÍDO)
+   - ✅ ValidationBehavior automático
+   - ✅ LoggingBehavior
 
-4. 🟡 **DTOs Request/Response** (Semana 3)
-   - Separar DTOs de entrada e saída
-   - Criar mappers
-   - Validadores FluentValidation
+4. ✅ **Performance e Type Safety** (CONCLUÍDO) ⚡
+   - ✅ DTO tipado para Dapper (MetadadoDto)
+   - ✅ Eliminar uso de dynamic
+   - ✅ PropertyInfo cacheados
+   - ✅ SQL com aliases para mapeamento correto
 
-5. 🟡 **Pipeline Behaviors** (Semana 3)
-   - ValidationBehavior automático
-   - LoggingBehavior
-   - TransactionBehavior
+5. 🔴 **Implementar CQRS Commands** (PENDENTE - Próximo)
+   - [ ] CriarMetadadoCommand + Handler + Validator
+   - [ ] AtualizarMetadadoCommand + Handler + Validator
+   - [ ] DesativarMetadadoCommand + Handler + Validator
 
-6. ⏳ **Completar testes manuais** (Em andamento)
-7. **Criar testes de integração automatizados**
-8. **Implementar cache de metadados**
-9. **Implementar logging avançado (Graylog)**
-10. **Adicionar autenticação/autorização (OAuth/JWT)**
+6. 🔴 **Implementar Unit of Work** (PENDENTE)
+   - [ ] Criar IUnitOfWork interface
+   - [ ] Controle transacional explícito
+   - [ ] CommitAsync() pattern
+
+7. 🟡 **DTOs Request/Response** (PENDENTE)
+   - [ ] Separar DTOs de entrada e saída
+   - [ ] Criar mappers
+   - [ ] Validadores FluentValidation adicionais
+
+8. ⏳ **Completar testes manuais** (Em andamento)
+9. **Criar testes de integração automatizados**
+10. **Implementar cache de metadados no QueryBuilderService**
+11. **Implementar logging avançado (Graylog)**
+12. **Adicionar autenticação/autorização (OAuth/JWT)**
 
 ---
 

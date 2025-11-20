@@ -1,21 +1,30 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using QueryBuilder.Domain.Interfaces;
 using QueryBuilder.Domain.Entities;
+using QueryBuilder.Domain.Interfaces;
+using QueryBuilder.Domain.Notifications;
+using QueryBuilder.Domain.Queries.Metadados;
 
 namespace QueryBuilder.Api.Controllers
 {
+    /// <summary>
+    /// Controller de Metadados - CQRS + MediatR Pattern
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class MetadadosController : ControllerBase
     {
-        private readonly IMetadadosRepository _repository;
+        private readonly IMediator _mediator;
+        private readonly INotificationContext _notificationContext;
         private readonly ILogger<MetadadosController> _logger;
 
         public MetadadosController(
-            IMetadadosRepository repository,
+            IMediator mediator,
+            INotificationContext notificationContext,
             ILogger<MetadadosController> logger)
         {
-            _repository = repository;
+            _mediator = mediator;
+            _notificationContext = notificationContext;
             _logger = logger;
         }
 
@@ -38,151 +47,130 @@ namespace QueryBuilder.Api.Controllers
                     "GET /api/metadados/teste - Esta rota de teste",
                     "GET /api/metadados - Listar todos os metadados",
                     "GET /api/metadados/{id} - Obter metadado por ID",
-                    "GET /api/metadados/tabela/{nome} - Obter metadado por nome da tabela",
-                    "POST /api/metadados - Criar novo metadado"
+                    "GET /api/metadados/tabela/{nome} - Obter metadado por nome da tabela"
                 }
             });
         }
 
         /// <summary>
-        /// Lista todos os metadados cadastrados
+        /// Lista todos os metadados cadastrados (CQRS Pattern)
         /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ObterTodos([FromQuery] bool apenasAtivos = true)
         {
-            try
-            {
-                var metadados = await _repository.ObterTodosAsync(apenasAtivos);
+            var query = new ObterTodosMetadadosQuery(apenasAtivos);
+            var resultado = await _mediator.Send(query);
 
-                return Ok(new
+            if (_notificationContext.HasNotifications)
+            {
+                return BadRequest(new
                 {
-                    Total = metadados.Count(),
-                    Dados = metadados.Select(m => new
+                    Erros = _notificationContext.Notifications.Select(n => new
                     {
-                        m.Id,
-                        m.Tabela,
-                        m.CamposDisponiveis,
-                        m.ChavePk,
-                        m.VinculoEntreTabela,
-                        m.DescricaoTabela,
-                        m.VisivelParaIA,
-                        m.Ativo,
-                        m.DataCriacao
+                        Campo = n.Key,
+                        Mensagem = n.Message
                     })
                 });
             }
-            catch (Exception ex)
+
+            if (resultado == null)
             {
-                _logger.LogError(ex, "Erro ao obter metadados");
-                return StatusCode(500, new { Erro = "Erro ao obter metadados", Detalhes = ex.Message });
+                return StatusCode(500, new { Erro = "Erro ao obter metadados" });
             }
+
+            return Ok(new
+            {
+                Total = resultado.Total,
+                Dados = resultado.Metadados.Select(m => new
+                {
+                    m.Id,
+                    m.Tabela,
+                    m.CamposDisponiveis,
+                    m.ChavePk,
+                    m.VinculoEntreTabela,
+                    m.DescricaoTabela,
+                    m.VisivelParaIA,
+                    m.Ativo,
+                    m.DataCriacao
+                })
+            });
         }
 
         /// <summary>
-        /// Obtém um metadado por ID
+        /// Obtém um metadado por ID (CQRS Pattern)
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ObterPorId(int id)
         {
-            try
-            {
-                var metadado = await _repository.ObterPorIdAsync(id);
+            var query = new ObterMetadadoPorIdQuery(id);
+            var metadado = await _mediator.Send(query);
 
-                if (metadado == null)
-                    return NotFound(new { Mensagem = $"Metadado com ID {id} não encontrado" });
-
-                return Ok(metadado);
-            }
-            catch (Exception ex)
+            if (_notificationContext.HasNotifications)
             {
-                _logger.LogError(ex, "Erro ao obter metadado por ID: {Id}", id);
-                return StatusCode(500, new { Erro = "Erro ao obter metadado", Detalhes = ex.Message });
+                var notificacao = _notificationContext.Notifications.FirstOrDefault();
+                if (notificacao?.Key == "NotFound")
+                {
+                    return NotFound(new { Mensagem = notificacao.Message });
+                }
+
+                return BadRequest(new
+                {
+                    Erros = _notificationContext.Notifications.Select(n => new
+                    {
+                        Campo = n.Key,
+                        Mensagem = n.Message
+                    })
+                });
             }
+
+            if (metadado == null)
+            {
+                return NotFound(new { Mensagem = $"Metadado com ID {id} não encontrado" });
+            }
+
+            return Ok(metadado);
         }
 
         /// <summary>
-        /// Obtém um metadado pelo nome da tabela
+        /// Obtém um metadado pelo nome da tabela (CQRS Pattern)
         /// </summary>
         [HttpGet("tabela/{nome}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ObterPorNomeTabela(string nome)
         {
-            try
+            var query = new ObterMetadadoPorTabelaQuery(nome);
+            var metadado = await _mediator.Send(query);
+
+            if (_notificationContext.HasNotifications)
             {
-                var metadado = await _repository.ObterPorNomeTabelaAsync(nome);
+                var notificacao = _notificationContext.Notifications.FirstOrDefault();
+                if (notificacao?.Key == "NotFound")
+                {
+                    return NotFound(new { Mensagem = notificacao.Message });
+                }
 
-                if (metadado == null)
-                    return NotFound(new { Mensagem = $"Metadado para tabela '{nome}' não encontrado" });
-
-                return Ok(metadado);
+                return BadRequest(new
+                {
+                    Erros = _notificationContext.Notifications.Select(n => new
+                    {
+                        Campo = n.Key,
+                        Mensagem = n.Message
+                    })
+                });
             }
-            catch (Exception ex)
+
+            if (metadado == null)
             {
-                _logger.LogError(ex, "Erro ao obter metadado por nome da tabela: {Nome}", nome);
-                return StatusCode(500, new { Erro = "Erro ao obter metadado", Detalhes = ex.Message });
+                return NotFound(new { Mensagem = $"Metadado para tabela '{nome}' não encontrado" });
             }
-        }
 
-        /// <summary>
-        /// Cria um novo metadado
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Criar([FromBody] CriarMetadadoRequest request)
-        {
-            try
-            {
-                // Verificar se já existe
-                if (await _repository.ExisteAsync(request.Tabela))
-                    return BadRequest(new { Erro = $"Já existe um metadado para a tabela '{request.Tabela}'" });
-
-                // Criar entity
-                var metadado = TabelaDinamica.Criar(
-                    tabela: request.Tabela,
-                    camposDisponiveis: request.CamposDisponiveis,
-                    chavePk: request.ChavePk,
-                    vinculoEntreTabela: request.VinculoEntreTabela,
-                    descricaoTabela: request.DescricaoTabela,
-                    descricaoCampos: request.DescricaoCampos,
-                    visivelParaIA: request.VisivelParaIA ?? true
-                );
-
-                // Salvar
-                var id = await _repository.CriarAsync(metadado);
-
-                _logger.LogInformation("Metadado criado com sucesso. ID: {Id}, Tabela: {Tabela}", id, request.Tabela);
-
-                return CreatedAtAction(
-                    nameof(ObterPorId),
-                    new { id },
-                    new { Id = id, Mensagem = "Metadado criado com sucesso" }
-                );
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { Erro = "Dados inválidos", Detalhes = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar metadado");
-                return StatusCode(500, new { Erro = "Erro ao criar metadado", Detalhes = ex.Message });
-            }
+            return Ok(metadado);
         }
     }
-
-    // DTO para criação de metadado
-    public record CriarMetadadoRequest(
-        string Tabela,
-        string CamposDisponiveis,
-        string ChavePk,
-        string? VinculoEntreTabela = null,
-        string? DescricaoTabela = null,
-        string? DescricaoCampos = null,
-        bool? VisivelParaIA = true
-    );
 }
