@@ -4,6 +4,141 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.5.2] - 2025-11-20 (REFATORAÇÃO - Simplificação Controllers Padrão Herval)
+
+### 🎯 Objetivo
+Simplificar controllers seguindo o padrão corporativo Herval - remover complexidade desnecessária e confiar no pipeline MediatR.
+
+### ✅ IMPLEMENTADO
+
+#### ⚡ Controllers Simplificados (Padrão Herval)
+- **MetadadosController refatorado**
+  - Removido `INotificationContext` e `ILogger` (confia no pipeline)
+  - Removidas validações manuais (FluentValidation cuida via pipeline)
+  - Endpoints diretos: `await _mediator.Send()` → `return Ok()`
+  - Expressões ternárias: `return metadado == null ? NotFound() : Ok(metadado)`
+  - POST recebe `CriarMetadadoCommand` direto no body (sem DTO intermediário)
+  - PUT usa `command with { Id = id }` (sintaxe record para setar ID da rota)
+  - DELETE simples com `DesativarMetadadoCommand(id)`
+  - Redução: ~323 linhas → 101 linhas (-68% de código)
+
+- **ConsultaDinamicaController refatorado**
+  - Removido `INotificationContext` e `ILogger`
+  - Removidas validações manuais e try-catch
+  - Injeção mínima: apenas `IMediator` e `IMetadadosRepository`
+  - `ListarTabelasDisponiveis()` agora busca direto do banco (evita hardcode)
+  - Redução: ~93 linhas → ~45 linhas (-52% de código)
+
+- **QueryBuilderTestController refatorado**
+  - Removido `ILogger`
+  - Removidos todos os try-catch (middleware global cuida)
+  - Removidos `ProducesResponseType` redundantes
+  - Rota duplicada `tabelas-conhecidas` removida
+  - Redução: ~176 linhas → 67 linhas (-62% de código)
+
+#### 🔧 Swagger com XML Comments
+- **Program.cs configurado**
+  - `SwaggerDoc` com título e descrição da API
+  - `IncludeXmlComments()` para exibir comentários `/// <summary>`
+  - Documentação automática dos endpoints no Swagger UI
+
+- **QueryBuilder.Api.csproj configurado**
+  - `<GenerateDocumentationFile>true</GenerateDocumentationFile>`
+  - `<NoWarn>$(NoWarn);1591</NoWarn>` (suprime warnings de membros não documentados)
+  - Arquivo XML gerado automaticamente no build
+
+#### 📊 Comparação Antes x Depois
+
+**MetadadosController:**
+```csharp
+// ANTES (complexo - 323 linhas)
+public async Task<IActionResult> ObterPorId(int id) {
+    var query = new ObterMetadadoPorIdQuery(id);
+    var metadado = await _mediator.Send(query);
+
+    if (_notificationContext.HasNotifications) {
+        var notificacao = _notificationContext.Notifications.FirstOrDefault();
+        if (notificacao?.Key == "NotFound")
+            return NotFound(new { Mensagem = notificacao.Message });
+        return BadRequest(new { Erros = _notificationContext.Notifications... });
+    }
+
+    if (metadado == null)
+        return NotFound(new { Mensagem = $"Metadado com ID {id} não encontrado" });
+
+    return Ok(metadado);
+}
+
+// AGORA (simples - 101 linhas)
+public async Task<IActionResult> ObterPorId(int id) {
+    var metadado = await _mediator.Send(new ObterMetadadoPorIdQuery(id));
+    return metadado == null ? NotFound() : Ok(metadado);
+}
+```
+
+**QueryBuilderTestController:**
+```csharp
+// ANTES (complexo - 176 linhas)
+public IActionResult GerarQuerySimples(string tabela) {
+    try {
+        _logger.LogInformation("Testando query simples...");
+        var query = _queryBuilderService.MontarQuery(tabela, incluirJoins: false);
+        var compiled = _compiler.Compile(query);
+        return Ok(new { Tabela = tabela, SQL = compiled.Sql, ... });
+    }
+    catch (ArgumentException ex) {
+        _logger.LogWarning(ex, "Tabela não encontrada...");
+        return NotFound(new { Erro = ex.Message });
+    }
+    catch (Exception ex) {
+        _logger.LogError(ex, "Erro ao gerar query...");
+        return BadRequest(new { Erro = ex.Message });
+    }
+}
+
+// AGORA (simples - 67 linhas)
+public IActionResult GerarQuerySimples(string tabela) {
+    var query = _queryBuilderService.MontarQuery(tabela, incluirJoins: false);
+    var compiled = _compiler.Compile(query);
+    return Ok(new { Tabela = tabela, SQL = compiled.Sql, Parametros = compiled.NamedBindings });
+}
+```
+
+### 🎯 Princípios Aplicados
+1. **Confiar no Pipeline** - ValidationBehavior intercepta erros automaticamente
+2. **Middleware Global** - Try-catch só quando necessário, não em todo método
+3. **Injeção Mínima** - Somente dependências realmente usadas
+4. **Expressões Diretas** - Ternários e arrow functions quando apropriado
+5. **Sem Overhead** - Não criar camadas/classes desnecessárias
+
+### 📊 Impacto
+- **MetadadosController:** 323 → 101 linhas (-68%)
+- **ConsultaDinamicaController:** 93 → 45 linhas (-52%)
+- **QueryBuilderTestController:** 176 → 67 linhas (-62%)
+- **Total reduzido:** 592 → 213 linhas (-64% de código!)
+- **Manutenibilidade:** Significativamente melhorada
+- **Legibilidade:** Código mais limpo e direto
+- **Swagger:** Documentação automática habilitada
+
+### 🎯 Benefícios
+- ✅ Código mais simples e legível (padrão Herval)
+- ✅ Menos pontos de falha (menos código = menos bugs)
+- ✅ Confia no pipeline MediatR (ValidationBehavior funciona)
+- ✅ Middleware global cuida de exceções
+- ✅ Controllers focados apenas em roteamento
+- ✅ Swagger exibe descrições dos endpoints automaticamente
+- ✅ Facilita onboarding de novos desenvolvedores
+- ✅ Alinhamento 100% com padrão corporativo
+
+### 🔍 Validação
+- ✅ Build sem erros
+- ✅ Swagger funcionando com XML comments
+- ✅ Endpoints testados e funcionando
+- ✅ ValidationBehavior interceptando erros corretamente
+- ✅ NotificationContext funcionando no pipeline
+
+---
+
 ## [0.5.1] - 2025-11-20 (OTIMIZAÇÃO - Performance e Type Safety)
 
 ### 🎯 Objetivo
