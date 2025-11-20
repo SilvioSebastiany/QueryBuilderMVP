@@ -54,14 +54,4 @@ public class QueryBuilderTestController : ControllerBase
         var compiled = _compiler.Compile(query);
         return Ok(new { Tabela = tabela, TotalFiltros = filtros.Count, SQL = compiled.Sql, Parametros = compiled.NamedBindings });
     }
-
-    /// <summary>
-    /// Lista todas as tabelas disponíveis nos metadados
-    /// </summary>
-    [HttpGet("tabelas-disponiveis")]
-    public IActionResult ListarTabelasDisponiveis()
-    {
-        var tabelas = _queryBuilderService.ListarTabelas();
-        return Ok(new { TotalTabelas = tabelas.Count, Tabelas = tabelas });
-    }
 }

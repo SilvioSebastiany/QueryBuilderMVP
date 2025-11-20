@@ -4,6 +4,98 @@ Registro de todas as mudanças notáveis neste projeto.
 
 ---
 
+## [0.5.4] - 2025-11-20 (DATABASE - Nova Tabela PAGAMENTOS + Suporte FK Composta)
+
+### 🎯 Objetivo
+Adicionar tabela PAGAMENTOS ao schema e implementar suporte para Foreign Keys compostas (múltiplos campos).
+
+### ✅ IMPLEMENTADO
+
+#### 📦 Nova Tabela: PAGAMENTOS
+- **Script:** `create-table-pagamentos.sql`
+- **Estrutura:**
+  - 10 colunas (ID, ID_PEDIDO, FORMA_PAGAMENTO, VALOR, DATA_PAGAMENTO, STATUS, etc.)
+  - Foreign Key para PEDIDOS (1:N)
+  - Constraints de validação (STATUS, FORMA_PAGAMENTO)
+  - Índices para performance (ID_PEDIDO, STATUS)
+  - Suporte a pagamentos parcelados (NUMERO_PARCELAS, PARCELA_ATUAL)
+  - Comentários completos em todas as colunas
+
+- **Dados de exemplo:**
+  - 10 registros inseridos
+  - 5 formas de pagamento: CREDITO, DEBITO, PIX, BOLETO, DINHEIRO
+  - 4 status: PENDENTE, APROVADO, RECUSADO, ESTORNADO
+  - Pagamentos parcelados e à vista
+  - Vinculados aos 6 pedidos existentes
+
+#### 📋 Metadados Atualizados
+- **Insert na TABELA_DINAMICA:**
+  - Tabela: PAGAMENTOS
+  - 10 campos mapeados
+  - Vínculo: `PEDIDOS:ID_PEDIDO:ID`
+  - Descrições detalhadas de cada campo
+  - Visível para IA: SIM
+  - Status: ATIVO
+
+#### 🔧 Suporte FK Composta (Nova Feature)
+- **Formato do VINCULO_ENTRE_TABELA:**
+  ```
+  TABELA_DESTINO:CAMPO_FK1+CAMPO_FK2:CAMPO_PK1+CAMPO_PK2
+  ```
+
+- **Exemplo prático:**
+  ```sql
+  -- FK Simples (atual)
+  'PEDIDOS:ID_PEDIDO:ID'
+
+  -- FK Composta (novo suporte)
+  'ESTOQUE_ALMOXARIFADO:ALMOXARIFADO+TIPO:ALMOXARIFADO+TIPO'
+  ```
+
+- **QueryBuilderService.ParseVinculos() atualizado:**
+  - Detecta símbolo `+` nos campos FK/PK
+  - Split automático dos campos compostos
+  - Gera JOIN com múltiplas condições ON
+  - Mantém compatibilidade com FK simples
+
+- **Exemplo de JOIN gerado:**
+  ```csharp
+  // FK Composta: ALMOXARIFADO+TIPO
+  query.LeftJoin("ESTOQUE_ALMOXARIFADO",
+      join => join.On("MOVIMENTACAO.ALMOXARIFADO", "ESTOQUE.ALMOXARIFADO")
+                  .On("MOVIMENTACAO.TIPO", "ESTOQUE.TIPO"));
+  ```
+
+### 📊 Estatísticas
+- **Tabelas no schema:** 6 → 7 (+1 tabela)
+- **Metadados cadastrados:** 6 → 7 (+1 registro)
+- **Total de campos mapeados:** 62 → 72 (+10 campos)
+- **Scripts SQL:** +1 arquivo (create-table-pagamentos.sql - 329 linhas)
+- **Foreign Keys compostas suportadas:** ✅
+
+### 🎯 Benefícios
+- ✅ Mais dados reais para testes (pagamentos parcelados, estornos, etc.)
+- ✅ Suporte a cenários complexos de FK composta
+- ✅ QueryBuilder agora gera JOINs com múltiplas condições
+- ✅ Mantém retrocompatibilidade (FK simples continua funcionando)
+- ✅ Documentação completa (COMMENTs no Oracle)
+- ✅ Preparado para cenários de almoxarifados, lotes, grades, etc.
+
+### 🔍 Casos de Uso FK Composta
+1. **Almoxarifado + Tipo** - Estoque separado por depósito e categoria
+2. **Loja + Produto + Data** - Estoque por loja e data
+3. **Cliente + Filial** - Dados distribuídos geograficamente
+4. **Ano + Mes + Empresa** - Particionamento temporal
+
+### 🔍 Validação
+- ✅ Tabela PAGAMENTOS criada com sucesso
+- ✅ 10 registros inseridos corretamente
+- ✅ Metadados cadastrados na TABELA_DINAMICA
+- ✅ JOINs com PEDIDOS e CLIENTES funcionando
+- ✅ Suporte FK composta documentado e pronto para uso
+
+---
+
 ## [0.5.3] - 2025-11-20 (ORGANIZAÇÃO - Separação de Interfaces)
 
 ### 🎯 Objetivo
